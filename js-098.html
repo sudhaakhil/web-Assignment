@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="JavaScript experiment 098: Required Fields Validation">
+<title>JS 098 — Required Fields Validation | Web Practical Programs</title>
+<style>
+
+:root{
+  --bg:#0a0e16;
+  --panel:#111827;
+  --panel-2:#161f2e;
+  --line:#232f42;
+  --line-soft:#1b2537;
+  --text:#e6ecff;
+  --muted:#8493b3;
+  --cyan:#33c9dc;
+  --cyan-soft:rgba(51,201,220,.12);
+  --blue:#4d8dff;
+  --green:#33d17a;
+  --green-soft:rgba(51,209,122,.12);
+  --amber:#f2b84b;
+  --amber-soft:rgba(242,184,75,.12);
+  --red:#ef5a6f;
+  --red-soft:rgba(239,90,111,.12);
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow-md:0 10px 30px -12px rgba(0,0,0,.6);
+  --maxw:1180px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{margin:0 0 .5em;line-height:1.3;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 1em;color:var(--muted)}
+code,pre{font-family:var(--mono)}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:4px}
+img{max-width:100%;display:block}
+
+.topnav{position:sticky;top:0;z-index:50;background:rgba(10,14,22,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topnav-inner{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:15px;white-space:nowrap}
+.brand-badge{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--blue));
+  display:flex;align-items:center;justify-content:center;color:#04141a;font-weight:800;font-size:13px}
+.brand small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+.navlinks{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.navlinks a{color:#aeb9d6;font-size:13.5px;font-weight:600;padding:8px 12px;border-radius:8px}
+.navlinks a:hover{background:rgba(255,255,255,.06);color:#fff;text-decoration:none}
+.navlinks a.active{background:var(--cyan-soft);color:var(--cyan)}
+
+.shell{max-width:var(--maxw);margin:0 auto;padding:40px 24px 80px}
+.hero{
+  background:radial-gradient(900px 300px at 10% -20%,rgba(77,141,255,.18),transparent 60%),
+    linear-gradient(160deg,#0d1420,#0a0e16 70%);
+  border:1px solid var(--line);border-radius:20px;padding:clamp(28px,5vw,52px);box-shadow:var(--shadow-md);
+}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;color:var(--cyan);font-size:12.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;background:var(--cyan-soft);border:1px solid rgba(51,201,220,.3);
+  padding:6px 12px;border-radius:999px;margin-bottom:18px}
+.hero h1{font-size:clamp(28px,4vw,42px);color:#fff;max-width:760px;margin-bottom:14px}
+.hero p.lead{color:var(--muted);max-width:660px;font-size:clamp(14px,1.6vw,16.5px)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px}
+.hero-meta div{font-size:12.5px;color:#6b7aa0}
+.hero-meta strong{display:block;color:#fff;font-size:14.5px;font-weight:700;margin-top:2px}
+
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:0 0 22px;flex-wrap:wrap}
+.crumbs a{color:var(--muted);font-weight:600}
+.crumbs a:hover{color:var(--cyan)}
+.crumbs .current{color:var(--text);font-weight:700}
+
+.exp-head{display:flex;align-items:flex-start;gap:18px;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px 26px;margin-bottom:26px;box-shadow:var(--shadow-md)}
+.exp-num{flex:none;width:52px;height:52px;border-radius:12px;background:var(--cyan-soft);color:var(--cyan);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;font-family:var(--mono)}
+.exp-head h1{font-size:clamp(19px,2.4vw,25px);color:#fff;margin-bottom:6px}
+.exp-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--cyan);background:var(--cyan-soft);padding:3px 9px;border-radius:6px;margin-bottom:8px}
+.exp-head p{color:var(--muted);margin:0;font-size:14.5px}
+
+.section-title{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin:36px 0 14px}
+.section-title:first-child{margin-top:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-md)}
+.card + .card{margin-top:18px}
+.grid{display:grid;gap:18px}
+.grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.grid.cols-3{grid-template-columns:repeat(3,1fr)}
+.grid.cols-4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:900px){.grid.cols-4{grid-template-columns:repeat(2,1fr)}.grid.cols-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr}}
+
+.stat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow-md)}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;margin-bottom:14px;background:var(--cyan-soft);color:var(--cyan)}
+.stat-card .stat-num{font-size:28px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.stat-card .stat-label{color:var(--muted);font-size:12.5px;margin-top:2px}
+
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px}
+.badge.ok{background:var(--green-soft);color:var(--green)}
+.badge.info{background:var(--cyan-soft);color:var(--cyan)}
+.badge.warn{background:var(--amber-soft);color:var(--amber)}
+.badge.err{background:var(--red-soft);color:var(--red)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:10px;
+  font-weight:700;font-size:14px;border:1px solid var(--line);cursor:pointer;transition:.15s;background:var(--panel-2);color:var(--text)}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#04141a;border-color:transparent}
+.btn-primary:hover{filter:brightness(1.08);color:#04141a}
+.btn-danger{background:var(--red-soft);border-color:rgba(239,90,111,.35);color:var(--red)}
+.btn-danger:hover{color:var(--red);border-color:var(--red)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.small{padding:7px 13px;font-size:12.5px;border-radius:8px}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:#c3cbe6}
+.field .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+.field .err{font-size:12px;color:var(--red);margin-top:5px;font-weight:600;display:none}
+.field.invalid .err{display:block}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--red)}
+.field.valid input,.field.valid select,.field.valid textarea{border-color:var(--green)}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],
+input[type=tel],input[type=search],input[type=url],select,textarea{
+  width:100%;padding:11px 13px;border-radius:9px;border:1.5px solid var(--line);background:var(--panel-2);
+  color:var(--text);font-size:14.5px;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);outline:none;box-shadow:0 0 0 3px var(--cyan-soft)}
+textarea{resize:vertical;min-height:90px}
+::placeholder{color:#5a6688}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.demo{border:1px dashed var(--line);background:var(--panel-2);border-radius:var(--radius-sm);padding:20px}
+.output{background:#05070c;color:#9fe8c8;border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 16px;
+  font-family:var(--mono);font-size:13px;min-height:46px;white-space:pre-wrap;word-break:break-word}
+.output .muted{color:#576089}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+thead th{background:var(--panel-2);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tbody tr:hover{background:rgba(51,201,220,.06)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm)}
+.table-wrap table{border:none}
+
+.exp-nav{display:flex;justify-content:space-between;gap:14px;margin-top:34px;flex-wrap:wrap}
+.exp-nav a{flex:1;min-width:140px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:14px 16px;font-size:13px;color:var(--text);font-weight:600}
+.exp-nav a:hover{border-color:var(--cyan);text-decoration:none}
+.exp-nav a.disabled{opacity:.35;pointer-events:none}
+.exp-nav .dir-index{text-align:center;color:var(--cyan);flex:none;min-width:170px}
+.exp-nav small{display:block;color:var(--muted);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+
+.dir-toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 8px;align-items:center}
+.dir-search{flex:1;min-width:220px;padding:12px 16px;border-radius:10px;border:1.5px solid var(--line);
+  font-size:14.5px;background:var(--panel-2);color:var(--text)}
+.dir-search:focus{border-color:var(--cyan);outline:none;box-shadow:0 0 0 3px var(--cyan-soft)}
+.filter-btn{padding:9px 15px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel-2);
+  font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s}
+.filter-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.filter-btn.active{background:var(--cyan);border-color:var(--cyan);color:#04141a}
+.result-count{font-size:12.5px;color:var(--muted);margin:10px 2px 18px}
+.exp-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.exp-card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:16px 18px;transition:.12s}
+.exp-card:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:var(--shadow-md);text-decoration:none}
+.exp-card .n{font-size:11px;font-weight:800;color:var(--cyan);font-family:var(--mono)}
+.exp-card .t{font-size:13.5px;font-weight:700;color:var(--text);margin-top:5px}
+.exp-card .c{font-size:11px;color:var(--muted);margin-top:8px;text-transform:uppercase;letter-spacing:.03em}
+.exp-card[hidden]{display:none}
+
+.site-footer{border-top:1px solid var(--line);background:var(--panel);margin-top:60px}
+.footer-inner{max-width:var(--maxw);margin:0 auto;padding:34px 24px;display:flex;justify-content:space-between;
+  gap:20px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.footer-inner strong{color:var(--text)}
+.footer-links{display:flex;gap:18px;flex-wrap:wrap}
+
+hr.rule{border:none;border-top:1px solid var(--line);margin:26px 0}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:var(--cyan-soft);color:var(--cyan);font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:999px}
+
+
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-badge">WP</span>
+        <span>Web Practical Programs<small>Sudha Akhil Eswar Reddy &middot; 250200369</small></span>
+      </a>
+      <div class="navlinks">
+        <a href="../index.html">Dashboard</a>
+      <a href="../html/index.html">HTML</a>
+      <a href="../css/index.html">CSS</a>
+      <a href="../javascript/index.html" class="active">JavaScript</a>
+      </div>
+    </div>
+  </nav>
+<main id="main">
+
+    <div class="shell">
+      <div class="crumbs">
+        <a href="../index.html">Dashboard</a><span class="sep">/</span>
+        <a href="index.html">JavaScript</a><span class="sep">/</span>
+        <span class="current">js-098.html</span>
+      </div>
+      <div class="exp-head">
+        <div class="exp-num">098</div>
+        <div>
+          <span class="exp-tag">Forms & Validation</span>
+          <h1>JS 098 &mdash; Required Fields Validation</h1>
+          <p>Category: Forms & Validation</p>
+        </div>
+      </div>
+      <div class="card">
+      <form id="f98" novalidate>
+        <div class="field" id="f98-a-f"><label>Full Name *</label><input id="f98-a" type="text"><div class="err"></div></div>
+        <div class="field" id="f98-b-f"><label>Email *</label><input id="f98-b" type="email"><div class="err"></div></div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+      <div class="success-box" id="f98-success">All required fields completed.</div>
+    </div>
+      <div class="exp-nav">
+        <a href="js-097.html"><small>&larr; Previous</small>Textarea Validation</a>
+        <a class="dir-index" href="index.html"><small>Directory</small>All experiments</a>
+        <a href="js-099.html" style="text-align:right"><small>Next &rarr;</small>Error Messages Beside Fields</a>
+      </div>
+    </div>
+    
+</main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div><strong>Sudha Akhil Eswar Reddy</strong> &middot; Roll No. 250200369<br>Sai University &middot; B.Tech CSE</div>
+      <div class="footer-links">
+        <a href="../index.html">Dashboard</a>
+        <a href="../html/index.html">HTML</a>
+        <a href="../css/index.html">CSS</a>
+        <a href="../javascript/index.html">JavaScript</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+
+    function setField(fieldEl, valid, msg){
+      fieldEl.classList.toggle('invalid', !valid);
+      fieldEl.classList.toggle('valid', valid);
+      const err = fieldEl.querySelector('.err');
+      if(err) err.textContent = valid ? '' : msg;
+    }
+
+    document.getElementById('f98').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const a = document.getElementById('f98-a').value.trim(), b = document.getElementById('f98-b').value.trim();
+      const aOk = a.length>0, bOk = b.length>0;
+      setField(document.getElementById('f98-a-f'), aOk, 'This field is required.');
+      setField(document.getElementById('f98-b-f'), bOk, 'This field is required.');
+      document.getElementById('f98-success').classList.toggle('show', aOk && bOk);
+    });
+    
+</script>
+</body>
+</html>
